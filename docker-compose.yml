@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  backend:
+    build: ./backend
+    container_name: f5_portal_backend
+    env_file:
+      - ./backend/.env
+    environment:
+      - DATABASE_URL=sqlite:////app/data/f5_portal.db
+      - BACKUP_STORAGE_DIR=/app/backup_storage
+    ports:
+      - "8000:8000"
+    volumes:
+      - backup_storage:/app/backup_storage
+      - db_data:/app/data
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: f5_portal_frontend
+    environment:
+      - BACKEND_URL=http://backend:8000
+    ports:
+      - "8501:8501"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  backup_storage:
+  db_data:
